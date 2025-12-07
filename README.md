@@ -12,34 +12,38 @@ A lightweight macOS menubar application that displays the current time in differ
 - **Multiple Timezones** - Track as many timezones as you need
 - **Real-time Updates** - Time updates every second
 - **Day Offset Indicator** - Clearly shows when a timezone is on a different day (+1 day / -1 day)
+- **Timezone Offset** - Optionally display hours offset from your local timezone (e.g., +5.5, -8)
 - **City Search** - Find and add timezones by searching for city names
 - **Drag to Reorder** - Organize your timezone list by dragging
+- **Display Modes** - Show flag only, location name only, or both
 - **12/24 Hour Format** - Choose your preferred time display format
+- **Show Seconds** - Optionally display seconds in the time
 - **Launch at Login** - Optionally start World Clock when you log in
-- **Native macOS Design** - Built with SwiftUI, supports light and dark mode
+- **Accessible** - Full VoiceOver support for screen reader users
+- **Native macOS Design** - Built with SwiftUI and AppKit, supports light and dark mode
 
 ## Screenshots
 
 *Menubar showing selected timezone:*
 ```
-🇬🇧 London 14:32:05
+🇬🇧 London  𝟏𝟒:𝟑𝟐:𝟎𝟓
 ```
 
 *Dropdown menu:*
 ```
-✓ 🇬🇧 London        14:32:05
-  🇺🇸 New York      09:32:05
-  🇭🇰 Hong Kong     22:32:05  +1 day
-  🇮🇳 Mumbai        20:02:05
-  ─────────────────────────
-  Preferences...
-  Quit
+🇬🇧 London        14:32:05  (+0)
+🇺🇸 New York      09:32:05  (-5)
+🇭🇰 Hong Kong     22:32:05  (+8)   +1 day
+🇮🇳 Mumbai        20:02:05  (+5.5)
+─────────────────────────
+Preferences...
+Quit
 ```
 
 ## Requirements
 
 - macOS 15.0 (Sequoia) or later
-- Xcode 15.0+ (for building)
+- Xcode 16.0+ (for building)
 
 ## Installation
 
@@ -53,19 +57,19 @@ A lightweight macOS menubar application that displays the current time in differ
 
 2. Build using Xcode:
    ```bash
-   xcodebuild -project WorldClock.xcodeproj -scheme WorldClock -configuration Release build
+   xcodebuild -project MenuBarWorldClock.xcodeproj -scheme MenuBarWorldClock -configuration Release build
    ```
 
    Or open in Xcode:
    ```bash
-   open WorldClock.xcodeproj
+   open MenuBarWorldClock.xcodeproj
    ```
 
-3. The built app will be in `build/Release/WorldClock.app`
+3. The built app will be in `build/Release/MenuBarWorldClock.app`
 
 4. Move to Applications folder:
    ```bash
-   mv build/Release/WorldClock.app /Applications/
+   mv build/Release/MenuBarWorldClock.app /Applications/
    ```
 
 ### Using Swift Package Manager
@@ -73,6 +77,7 @@ A lightweight macOS menubar application that displays the current time in differ
 For development/testing purposes:
 ```bash
 swift build
+swift run
 ```
 
 ## Usage
@@ -88,7 +93,7 @@ On first launch, MenuBar World Clock comes pre-configured with these timezones:
 
 ### Changing the Primary Timezone
 
-Click on any timezone in the dropdown menu to set it as the primary. The primary timezone is displayed in the menubar and marked with a checkmark (✓) in the dropdown.
+Click on any timezone in the dropdown menu to set it as the primary. The primary timezone is displayed in the menubar.
 
 ### Adding Timezones
 
@@ -111,14 +116,17 @@ In the Preferences window, drag timezones to reorder them. The order is reflecte
 
 ### Settings
 
-- **Time Format**: Toggle between 12-hour (2:30:05 PM) and 24-hour (14:30:05) format
+- **Display**: Choose to show flag only, location name only, or both
+- **Time Format**: Toggle between 12-hour (2:30 PM) and 24-hour (14:30) format
+- **Show Seconds**: Display seconds in the time (e.g., 14:30:45)
+- **Show Timezone Offset**: Display hours offset from your timezone (e.g., +8, -5, +5.5)
 - **Launch at Login**: Enable to automatically start World Clock when you log in
 
 ## Project Structure
 
 ```
-WorldClock/
-├── WorldClockApp.swift              # App entry point
+MenuBarWorldClock/
+├── WorldClockApp.swift              # App entry point and menu bar integration
 ├── AppState.swift                   # Main view model
 ├── Models/
 │   ├── WorldClockEntry.swift        # Timezone data model
@@ -128,13 +136,12 @@ WorldClock/
 │   ├── TimezoneService.swift        # Time formatting & city search
 │   └── LaunchAtLoginService.swift   # Login item management
 ├── Views/
-│   ├── MenuBarView.swift            # Dropdown menu
 │   ├── PreferencesView.swift        # Preferences window
 │   └── AddTimezoneView.swift        # City search sheet
 ├── Info.plist
 └── WorldClock.entitlements
 
-WorldClockTests/
+MenuBarWorldClockTests/
 ├── WorldClockEntryTests.swift       # Model tests
 ├── TimezoneServiceTests.swift       # Time service tests
 ├── PreferencesServiceTests.swift    # Persistence tests
@@ -145,38 +152,48 @@ WorldClockTests/
 
 The app follows MVVM architecture with dependency injection for testability:
 
-- **Models**: Pure data structures (`WorldClockEntry`, `AppSettings`)
+- **Models**: Pure data structures (`WorldClockEntry`, `AppSettings`, `DisplayMode`)
 - **Services**: Business logic with protocol abstractions
   - `PreferencesServiceProtocol` - Data persistence
   - `TimezoneServiceProtocol` - Time formatting and search
   - `LaunchAtLoginServiceProtocol` - System integration
 - **AppState**: Main view model that coordinates services and exposes state to views
-- **Views**: SwiftUI views that observe `AppState`
+- **Views**: SwiftUI views for preferences; AppKit NSMenu for the dropdown menu
 
 ## Testing
 
 Run tests using Xcode:
 ```bash
-xcodebuild test -project WorldClock.xcodeproj -scheme WorldClock
+xcodebuild test -project MenuBarWorldClock.xcodeproj -scheme MenuBarWorldClock
 ```
 
-Or via Swift Package Manager (requires Xcode):
+Or via Swift Package Manager:
 ```bash
 swift test
 ```
 
-The test suite includes:
+The test suite includes 71 tests covering:
 - Unit tests for data models
 - Unit tests for services with mock dependencies
 - Integration tests for AppState with mock services
+- Settings persistence tests
+- Timezone offset calculation tests
 
 ## Configuration
 
 User preferences are stored in UserDefaults under the following keys:
 - `worldclock.timezones` - Array of configured timezones
-- `worldclock.settings` - App settings (time format, launch at login, primary timezone)
+- `worldclock.settings` - App settings (time format, display mode, show seconds, show timezone offset, launch at login, primary timezone)
 
-Bundle identifier: `com.12nines.worldclock`
+Bundle identifier: `com.12nines.menubarworldclock`
+
+## Accessibility
+
+MenuBar World Clock is fully accessible with VoiceOver:
+- Menu bar button announces the current city and time
+- Dropdown menu items provide detailed descriptions including timezone offsets and day changes
+- Preferences window includes proper labels, hints, and semantic structure
+- All interactive elements are keyboard accessible
 
 ## Supported Timezones
 
