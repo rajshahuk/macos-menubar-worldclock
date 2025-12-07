@@ -60,6 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func updateStatusItemTitle() {
         guard let primary = appState.primaryTimezone else {
             statusItem.button?.title = "🕐"
+            statusItem.button?.setAccessibilityLabel("World Clock")
             return
         }
 
@@ -68,6 +69,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let offsetText = appState.settings.showTimezoneOffset ? " (\(appState.hourOffset(for: primary)))" : ""
         let locationPart = formatLocationPart(flag: primary.flagEmoji, city: primary.cityName)
         statusItem.button?.title = "\(locationPart)  \(fixedWidthTime)\(offsetText)"
+
+        // Accessibility: provide a clear description for VoiceOver
+        let accessibilityLabel = "World Clock: \(primary.cityName), \(time)"
+        statusItem.button?.setAccessibilityLabel(accessibilityLabel)
+        statusItem.button?.setAccessibilityHelp("Click to see all configured timezones")
     }
 
     private func formatLocationPart(flag: String, city: String) -> String {
@@ -127,6 +133,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let attributes: [NSAttributedString.Key: Any] = [.font: font]
             item.attributedTitle = NSAttributedString(string: label, attributes: attributes)
 
+            // Accessibility: provide clear description for VoiceOver
+            let accessibilityDescription = formatAccessibilityLabel(
+                city: timezone.cityName,
+                time: time,
+                dayOffset: dayOffset,
+                hourOffset: hourOffset,
+                isPrimary: isPrimary
+            )
+            item.setAccessibilityLabel(accessibilityDescription)
+
             menu.addItem(item)
         }
 
@@ -135,6 +151,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Preferences
         let prefsItem = NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: ",")
         prefsItem.target = self
+        prefsItem.setAccessibilityHelp("Open preferences to manage timezones and settings")
         menu.addItem(prefsItem)
 
         menu.addItem(NSMenuItem.separator())
@@ -142,7 +159,40 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Quit
         let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
+        quitItem.setAccessibilityHelp("Quit MenuBar World Clock")
         menu.addItem(quitItem)
+    }
+
+    private func formatAccessibilityLabel(city: String, time: String, dayOffset: String?, hourOffset: String?, isPrimary: Bool) -> String {
+        var parts = [String]()
+
+        if isPrimary {
+            parts.append("\(city), currently selected")
+        } else {
+            parts.append(city)
+        }
+
+        parts.append("time: \(time)")
+
+        if let hourOff = hourOffset {
+            if hourOff == "0" {
+                parts.append("same time as your timezone")
+            } else if hourOff.hasPrefix("+") {
+                parts.append("\(hourOff.dropFirst()) hours ahead")
+            } else {
+                parts.append("\(hourOff.dropFirst()) hours behind")
+            }
+        }
+
+        if let dayOff = dayOffset {
+            parts.append(dayOff)
+        }
+
+        if !isPrimary {
+            parts.append("click to select as primary")
+        }
+
+        return parts.joined(separator: ", ")
     }
 
     private func formatMenuLabel(flag: String, city: String, time: String, dayOffset: String?, hourOffset: String?) -> String {
@@ -191,7 +241,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let window = NSWindow(contentViewController: hostingController)
         window.title = "MenuBar World Clock Preferences"
         window.styleMask = [.titled, .closable]
-        window.setContentSize(NSSize(width: 450, height: 350))
+        window.setContentSize(NSSize(width: 500, height: 550))
         window.center()
         window.isReleasedWhenClosed = false
         window.level = .modalPanel

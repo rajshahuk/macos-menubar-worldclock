@@ -12,11 +12,14 @@ struct AddTimezoneView: View {
             HStack {
                 Text("Add Timezone")
                     .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Button("Done") {
                     isPresented = false
                 }
                 .keyboardShortcut(.escape, modifiers: [])
+                .accessibilityLabel("Done")
+                .accessibilityHint("Close this dialog")
             }
             .padding()
 
@@ -26,11 +29,14 @@ struct AddTimezoneView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
                 TextField("Search for a city...", text: $searchText)
                     .textFieldStyle(.plain)
                     .onChange(of: searchText) { _, newValue in
                         performSearch(query: newValue)
                     }
+                    .accessibilityLabel("Search for a city")
+                    .accessibilityHint("Type a city name to find timezones")
                 if !searchText.isEmpty {
                     Button(action: {
                         searchText = ""
@@ -40,6 +46,8 @@ struct AddTimezoneView: View {
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search")
+                    .accessibilityHint("Clear the search field")
                 }
             }
             .padding()
@@ -60,6 +68,7 @@ struct AddTimezoneView: View {
                     Spacer()
                     Text("No results found")
                         .foregroundColor(.secondary)
+                        .accessibilityLabel("No results found for \(searchText)")
                     Spacer()
                 }
             } else {
@@ -69,6 +78,8 @@ struct AddTimezoneView: View {
                     }
                 }
                 .listStyle(.plain)
+                .accessibilityLabel("Search results")
+                .accessibilityHint("\(searchResults.count) timezones found")
             }
         }
         .frame(width: 400, height: 450)
@@ -95,6 +106,7 @@ struct SearchResultRow: View {
         HStack {
             Text(result.flagEmoji)
                 .font(.title2)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading) {
                 Text(result.cityName)
@@ -112,12 +124,17 @@ struct SearchResultRow: View {
                     .font(.title2)
             }
             .buttonStyle(.plain)
-            .help("Add this timezone")
+            .accessibilityLabel("Add \(result.cityName)")
+            .accessibilityHint("Add \(result.cityName), \(result.countryName) to your timezone list")
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
         .onTapGesture {
             onAdd()
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(result.cityName), \(result.countryName)")
+        .accessibilityHint("Double-tap to add this timezone")
+        .accessibilityAddTraits(.isButton)
     }
 }
