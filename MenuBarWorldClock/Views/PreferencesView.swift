@@ -166,6 +166,12 @@ struct SettingsSection: View {
                         ))
                         .help("Display hours offset from your timezone (e.g., +2, -5)")
 
+                        Toggle("Use Monospaced Font", isOn: Binding(
+                            get: { appState.settings.useMonospacedFont },
+                            set: { appState.setUseMonospacedFont($0) }
+                        ))
+                        .help("Use a monospaced font in the dropdown menu for better alignment")
+
                         Toggle("Launch at Login", isOn: Binding(
                             get: { appState.settings.launchAtLogin },
                             set: { appState.setLaunchAtLogin($0) }

@@ -136,6 +136,11 @@ final class AppState: ObservableObject {
         saveSettings()
     }
 
+    func setUseMonospacedFont(_ useMonospaced: Bool) {
+        settings.useMonospacedFont = useMonospaced
+        saveSettings()
+    }
+
     func hourOffset(for entry: WorldClockEntry) -> String {
         timezoneService.hourOffset(for: entry)
     }

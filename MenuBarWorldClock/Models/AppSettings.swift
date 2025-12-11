@@ -21,14 +21,16 @@ struct AppSettings: Codable, Equatable {
     var launchAtLogin: Bool
     var primaryTimezoneId: UUID?
     var displayMode: DisplayMode
+    var useMonospacedFont: Bool
 
-    init(use24HourFormat: Bool = true, showSeconds: Bool = true, showTimezoneOffset: Bool = false, launchAtLogin: Bool = false, primaryTimezoneId: UUID? = nil, displayMode: DisplayMode = .both) {
+    init(use24HourFormat: Bool = true, showSeconds: Bool = true, showTimezoneOffset: Bool = false, launchAtLogin: Bool = false, primaryTimezoneId: UUID? = nil, displayMode: DisplayMode = .both, useMonospacedFont: Bool = true) {
         self.use24HourFormat = use24HourFormat
         self.showSeconds = showSeconds
         self.showTimezoneOffset = showTimezoneOffset
         self.launchAtLogin = launchAtLogin
         self.primaryTimezoneId = primaryTimezoneId
         self.displayMode = displayMode
+        self.useMonospacedFont = useMonospacedFont
     }
 
     static let `default` = AppSettings()

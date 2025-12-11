@@ -109,29 +109,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func rebuildMenu() {
         menu.removeAllItems()
 
+        // Calculate column widths based on current data
+        let columnWidths = calculateColumnWidths()
+
         // Add timezone items
         for timezone in appState.timezones {
             let isPrimary = appState.isPrimary(timezone)
             let time = appState.formattedTime(for: timezone)
             let dayOffset = appState.dayOffsetString(for: timezone)
             let hourOffset = appState.settings.showTimezoneOffset ? appState.hourOffset(for: timezone) : nil
-            let label = formatMenuLabel(
+
+            let item = NSMenuItem(title: "", action: #selector(selectTimezone(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = timezone.id
+
+            // Create attributed string with tab stops for grid alignment
+            item.attributedTitle = createMenuItemAttributedString(
+                isPrimary: isPrimary,
                 flag: timezone.flagEmoji,
                 city: timezone.cityName,
                 time: time,
+                hourOffset: hourOffset,
                 dayOffset: dayOffset,
-                hourOffset: hourOffset
+                columnWidths: columnWidths
             )
-
-            let item = NSMenuItem(title: label, action: isPrimary ? nil : #selector(selectTimezone(_:)), keyEquivalent: "")
-            item.target = self
-            item.representedObject = timezone.id
-            item.isEnabled = !isPrimary
-
-            // Use monospaced font
-            let font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
-            let attributes: [NSAttributedString.Key: Any] = [.font: font]
-            item.attributedTitle = NSAttributedString(string: label, attributes: attributes)
 
             // Accessibility: provide clear description for VoiceOver
             let accessibilityDescription = formatAccessibilityLabel(
@@ -188,36 +189,141 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             parts.append(dayOff)
         }
 
-        if !isPrimary {
-            parts.append("click to select as primary")
-        }
+        parts.append("click to select as primary")
 
         return parts.joined(separator: ", ")
     }
 
-    private func formatMenuLabel(flag: String, city: String, time: String, dayOffset: String?, hourOffset: String?) -> String {
-        var result: String
+    private struct ColumnWidths {
+        let location: CGFloat
+        let time: CGFloat
+        let offset: CGFloat
+    }
 
+    private func getMenuFont() -> NSFont {
+        if appState.settings.useMonospacedFont {
+            return NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        } else {
+            return NSFont.systemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        }
+    }
+
+    private func calculateColumnWidths() -> ColumnWidths {
+        let font = getMenuFont()
+        let attributes: [NSAttributedString.Key: Any] = [.font: font]
+
+        // Find the longest location string
+        var maxLocationWidth: CGFloat = 0
+        for timezone in appState.timezones {
+            let locationText: String
+            switch appState.settings.displayMode {
+            case .flagOnly:
+                locationText = timezone.flagEmoji
+            case .locationOnly:
+                locationText = timezone.cityName
+            case .both:
+                locationText = "\(timezone.flagEmoji) \(timezone.cityName)"
+            }
+            let width = (locationText as NSString).size(withAttributes: attributes).width
+            maxLocationWidth = max(maxLocationWidth, width)
+        }
+
+        // Find the longest time string
+        var maxTimeWidth: CGFloat = 0
+        for timezone in appState.timezones {
+            let time = appState.formattedTime(for: timezone)
+            let width = (time as NSString).size(withAttributes: attributes).width
+            maxTimeWidth = max(maxTimeWidth, width)
+        }
+
+        // Find the longest offset string
+        var maxOffsetWidth: CGFloat = 0
+        if appState.settings.showTimezoneOffset {
+            for timezone in appState.timezones {
+                let hourOffset = appState.hourOffset(for: timezone)
+                let dayOffset = appState.dayOffsetString(for: timezone)
+                var offsetText = "(\(hourOffset))"
+                if let day = dayOffset {
+                    offsetText += "  \(day)"
+                }
+                let width = (offsetText as NSString).size(withAttributes: attributes).width
+                maxOffsetWidth = max(maxOffsetWidth, width)
+            }
+        } else {
+            // Just day offset
+            for timezone in appState.timezones {
+                if let dayOffset = appState.dayOffsetString(for: timezone) {
+                    let width = (dayOffset as NSString).size(withAttributes: attributes).width
+                    maxOffsetWidth = max(maxOffsetWidth, width)
+                }
+            }
+        }
+
+        return ColumnWidths(
+            location: maxLocationWidth,
+            time: maxTimeWidth,
+            offset: maxOffsetWidth
+        )
+    }
+
+    private func createMenuItemAttributedString(
+        isPrimary: Bool,
+        flag: String,
+        city: String,
+        time: String,
+        hourOffset: String?,
+        dayOffset: String?,
+        columnWidths: ColumnWidths
+    ) -> NSAttributedString {
+        let font = getMenuFont()
+
+        // Define tab stop positions
+        let checkmarkWidth: CGFloat = 24
+        let columnGap: CGFloat = 16
+        let locationTabStop = checkmarkWidth
+        let timeTabStop = locationTabStop + columnWidths.location + columnGap
+        let offsetTabStop = timeTabStop + columnWidths.time + columnGap
+
+        // Create paragraph style with tab stops
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.tabStops = [
+            NSTextTab(textAlignment: .left, location: locationTabStop),
+            NSTextTab(textAlignment: .left, location: timeTabStop),
+            NSTextTab(textAlignment: .left, location: offsetTabStop)
+        ]
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .paragraphStyle: paragraphStyle
+        ]
+
+        // Build the string with tabs
+        let checkmark = isPrimary ? "✓" : " "
+        let locationText: String
         switch appState.settings.displayMode {
         case .flagOnly:
-            result = "\(flag)  \(time)"
+            locationText = flag
         case .locationOnly:
-            let paddedCity = city.padding(toLength: 14, withPad: " ", startingAt: 0)
-            result = "\(paddedCity) \(time)"
+            locationText = city
         case .both:
-            let paddedCity = city.padding(toLength: 14, withPad: " ", startingAt: 0)
-            result = "\(flag) \(paddedCity) \(time)"
+            locationText = "\(flag) \(city)"
         }
 
+        var offsetText = ""
         if let hourOff = hourOffset {
-            result += "  (\(hourOff))"
+            offsetText = "(\(hourOff))"
         }
-
         if let dayOff = dayOffset {
-            result += "  \(dayOff)"
+            if !offsetText.isEmpty {
+                offsetText += "  \(dayOff)"
+            } else {
+                offsetText = dayOff
+            }
         }
 
-        return result
+        let menuText = "\(checkmark)\t\(locationText)\t\(time)\t\(offsetText)"
+
+        return NSAttributedString(string: menuText, attributes: attributes)
     }
 
     @objc private func selectTimezone(_ sender: NSMenuItem) {
