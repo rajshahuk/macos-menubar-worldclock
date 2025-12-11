@@ -47,7 +47,17 @@ Quit
 
 ## Installation
 
-### Building from Source
+### Prerequisites
+
+Before building, you can verify your system has all required dependencies:
+
+```bash
+./scripts/check-prerequisites.sh
+```
+
+### Building MenuBarWorldClock.app
+
+#### Option 1: Using Xcode (Recommended)
 
 1. Clone the repository:
    ```bash
@@ -55,30 +65,63 @@ Quit
    cd macos-menubar-worldclock
    ```
 
-2. Build using Xcode:
-   ```bash
-   xcodebuild -project MenuBarWorldClock.xcodeproj -scheme MenuBarWorldClock -configuration Release build
-   ```
-
-   Or open in Xcode:
+2. Open the project in Xcode:
    ```bash
    open MenuBarWorldClock.xcodeproj
    ```
 
-3. The built app will be in `build/Release/MenuBarWorldClock.app`
+3. Select **Product → Build** (⌘B) to build, or **Product → Archive** to create a distributable archive.
+
+4. The built app can be found via **Product → Show Build Folder in Finder**.
+
+5. Drag `MenuBarWorldClock.app` to your Applications folder.
+
+#### Option 2: Using xcodebuild (Command Line)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/macos-menubar-worldclock.git
+   cd macos-menubar-worldclock
+   ```
+
+2. Build the app:
+   ```bash
+   xcodebuild -project MenuBarWorldClock.xcodeproj \
+              -scheme MenuBarWorldClock \
+              -configuration Release \
+              -derivedDataPath build \
+              build
+   ```
+
+3. The built app will be at:
+   ```
+   build/Build/Products/Release/MenuBarWorldClock.app
+   ```
 
 4. Move to Applications folder:
    ```bash
-   mv build/Release/MenuBarWorldClock.app /Applications/
+   cp -r build/Build/Products/Release/MenuBarWorldClock.app /Applications/
    ```
 
-### Using Swift Package Manager
+#### Option 3: Using Swift Package Manager (Development)
 
-For development/testing purposes:
+For quick development and testing:
+
 ```bash
+# Check prerequisites
+./scripts/check-prerequisites.sh
+
+# Build
 swift build
+
+# Run directly (without creating .app bundle)
 swift run
+
+# Or run the built executable
+.build/debug/MenuBarWorldClock
 ```
+
+Note: When using Swift Package Manager, the app runs as a standalone executable without the full .app bundle structure. This is suitable for development but not for distribution.
 
 ## Usage
 
@@ -120,6 +163,7 @@ In the Preferences window, drag timezones to reorder them. The order is reflecte
 - **Time Format**: Toggle between 12-hour (2:30 PM) and 24-hour (14:30) format
 - **Show Seconds**: Display seconds in the time (e.g., 14:30:45)
 - **Show Timezone Offset**: Display hours offset from your timezone (e.g., +8, -5, +5.5)
+- **Use Monospaced Font**: Use a monospaced font in the dropdown menu for better column alignment
 - **Launch at Login**: Enable to automatically start World Clock when you log in
 
 ## Project Structure
