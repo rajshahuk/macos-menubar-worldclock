@@ -150,7 +150,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(NSMenuItem.separator())
 
         // Preferences
-        let prefsItem = NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: ",")
+        let prefsItem = NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: "")
         prefsItem.target = self
         prefsItem.setAccessibilityHelp("Open preferences to manage timezones and settings")
         menu.addItem(prefsItem)
@@ -158,7 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(NSMenuItem.separator())
 
         // Quit
-        let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "")
         quitItem.target = self
         quitItem.setAccessibilityHelp("Quit MenuBar World Clock")
         menu.addItem(quitItem)
@@ -278,8 +278,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let font = getMenuFont()
 
         // Define tab stop positions
-        let checkmarkWidth: CGFloat = 24
-        let columnGap: CGFloat = 16
+        let checkmarkWidth: CGFloat = 20
+        let columnGap: CGFloat = 12
         let locationTabStop = checkmarkWidth
         let timeTabStop = locationTabStop + columnWidths.location + columnGap
         let offsetTabStop = timeTabStop + columnWidths.time + columnGap
