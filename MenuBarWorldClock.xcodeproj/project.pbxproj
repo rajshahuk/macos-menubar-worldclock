@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000150000000000000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000150000000000000015 /* Assets.xcassets */; };
 		A10000010000000000000001 /* WorldClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001 /* WorldClockApp.swift */; };
 		A10000020000000000000002 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020000000000000002 /* AppState.swift */; };
 		A10000030000000000000003 /* WorldClockEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000030000000000000003 /* WorldClockEntry.swift */; };
@@ -50,6 +51,7 @@
 		A20000140000000000000014 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		A60000010000000000000001 /* MenuBarWorldClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarWorldClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A60000020000000000000002 /* MenuBarWorldClockTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MenuBarWorldClockTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000150000000000000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A70000010000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A70000020000000000000002 /* WorldClock.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WorldClock.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +91,7 @@
 				A90000050000000000000005 /* Models */,
 				A90000060000000000000006 /* Services */,
 				A90000070000000000000007 /* Views */,
+				A20000150000000000000015 /* Assets.xcassets */,
 				A70000010000000000000001 /* Info.plist */,
 				A70000020000000000000002 /* WorldClock.entitlements */,
 			);
@@ -225,6 +228,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000150000000000000015 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

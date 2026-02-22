@@ -13,7 +13,8 @@ let package = Package(
         .executableTarget(
             name: "MenuBarWorldClock",
             path: "MenuBarWorldClock",
-            exclude: ["Info.plist", "WorldClock.entitlements"]
+            exclude: ["Info.plist", "WorldClock.entitlements"],
+            resources: [.process("Assets.xcassets")]
         ),
         .testTarget(
             name: "MenuBarWorldClockTests",
