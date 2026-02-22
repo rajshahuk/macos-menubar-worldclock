@@ -59,8 +59,10 @@ final class MockLaunchAtLoginService: LaunchAtLoginServiceProtocol {
     var isEnabled: Bool = false
     var setEnabledCalled = false
     var lastEnabledValue: Bool?
+    var shouldThrow = false
 
-    func setEnabled(_ enabled: Bool) {
+    func setEnabled(_ enabled: Bool) throws {
+        if shouldThrow { throw NSError(domain: "MockLaunchAtLogin", code: 1) }
         setEnabledCalled = true
         lastEnabledValue = enabled
         isEnabled = enabled

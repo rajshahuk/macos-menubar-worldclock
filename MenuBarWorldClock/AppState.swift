@@ -145,10 +145,16 @@ final class AppState: ObservableObject {
         timezoneService.hourOffset(for: entry)
     }
 
-    func setLaunchAtLogin(_ enabled: Bool) {
-        settings.launchAtLogin = enabled
-        launchAtLoginService.setEnabled(enabled)
-        saveSettings()
+    @discardableResult
+    func setLaunchAtLogin(_ enabled: Bool) -> Bool {
+        do {
+            try launchAtLoginService.setEnabled(enabled)
+            settings.launchAtLogin = enabled
+            saveSettings()
+            return true
+        } catch {
+            return false
+        }
     }
 
     func searchTimezones(query: String) -> [TimezoneSearchResult] {

@@ -90,9 +90,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func makeFixedWidthTime(_ time: String) -> String {
         var result = ""
         for char in time {
-            if let digit = char.wholeNumberValue {
-                let sansSerifDigit = Character(UnicodeScalar(0x1D7E2 + digit)!)
-                result.append(sansSerifDigit)
+            if let digit = char.wholeNumberValue,
+               digit >= 0 && digit <= 9,
+               let scalar = UnicodeScalar(0x1D7E2 + digit) {
+                result.append(Character(scalar))
             } else {
                 result.append(char)
             }

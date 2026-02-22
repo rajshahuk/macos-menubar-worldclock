@@ -3,7 +3,7 @@ import ServiceManagement
 
 protocol LaunchAtLoginServiceProtocol {
     var isEnabled: Bool { get }
-    func setEnabled(_ enabled: Bool)
+    func setEnabled(_ enabled: Bool) throws
 }
 
 final class LaunchAtLoginService: LaunchAtLoginServiceProtocol {
@@ -11,15 +11,11 @@ final class LaunchAtLoginService: LaunchAtLoginServiceProtocol {
         SMAppService.mainApp.status == .enabled
     }
 
-    func setEnabled(_ enabled: Bool) {
-        do {
-            if enabled {
-                try SMAppService.mainApp.register()
-            } else {
-                try SMAppService.mainApp.unregister()
-            }
-        } catch {
-            print("Failed to \(enabled ? "enable" : "disable") launch at login: \(error)")
+    func setEnabled(_ enabled: Bool) throws {
+        if enabled {
+            try SMAppService.mainApp.register()
+        } else {
+            try SMAppService.mainApp.unregister()
         }
     }
 }
